@@ -1,0 +1,807 @@
+* Baum
+
+  [[https://circleci.com/gh/rkworks/baum][https://circleci.com/gh/rkworks/baum.svg?style=svg&circle-token=28eaca8bfec84f4b9efbc4a07c3a4745fe478020]]
+
+  *Baum* is an extended Clojure reader designed to create
+  self-contained configuration files.
+
+  It is built on top of
+  [[https://github.com/clojure/tools.reader][clojure.tools.reader]]
+  and offers following features.
+
+  - Selectable reader
+    - A complete Clojure reader (=clojure.tools.reader/read-string=)
+    - An EDN-only reader (=clojure.tools.reader.edn/read-string=)
+  - Access to environment variables, Java system properties,
+    =project.clj=, and so on (powered by [[https://github.com/weavejester/environ][Environ]])
+  - Importing external files
+  - Local variables
+  - Extensible global variables
+  - Conditional evaluation
+    - This allows you to write environment specific configurations.
+  - etc...
+
+  It achieves these features by reader macros and post-parsing
+  reduction.
+
+** Setup
+
+   Add the following dependency in your =project.clj= file:
+
+   #+begin_src clojure
+     [rkworks/baum "0.1.0-SNAPSHOT"]
+   #+end_src
+
+** Reading your config file
+
+   To read your config files, use =read-config=:
+
+   #+begin_src clojure
+     (ns your-ns
+       (:require [baum.core :as b]))
+
+     (def config (b/read-config "path/to/config.edn")) ; a map
+
+     (:foo config)
+     (get-in config [:foo :bar])
+   #+end_src
+
+   It also supports other arguments:
+
+   #+begin_src clojure
+     (ns your-ns
+       (:require [baum.core :as b]
+                 [clojure.java.io :as io]))
+
+     (def config (b/read-config (io/resource "config.edn")))
+
+     (def config2
+       (b/read-config (java.io.StringReader. "{:a :b}"))) ; Same as (b/read-string "{:a :b}")
+   #+end_src
+
+   See =clojure.java.io/reader= for a complete list of supported
+   arguments.
+
+   Baum uses =clojure.tools.reader/read-string= as a reader by
+   default. If you want to use the EDN-only reader, pass an option as
+   follows:
+
+   #+begin_src clojure
+     (ns your-ns
+       (:require [baum.core :as b]))
+
+     (def config (b/read-config "path/to/config.edn"
+                                {:edn? true}))
+   #+end_src
+
+   Even though you use the EDN-only reader, some features of Baum may
+   spoil its safety. So you should still load only trusted resources.
+
+   In addition, to disable =#baum/eval=, set
+   =clojure.tools.reader/*read-eval*= to false:
+
+   #+begin_src clojure
+     (ns your-ns
+       (:require [baum.core :as b]
+                 [clojure.tools.reader :as r]))
+
+     (def config (binding [r/*read-eval* false]
+                   (b/read-config "path/to/config.edn"
+                                  {:edn? true})))
+   #+end_src
+
+** Examples
+
+*** Database settings in one file
+
+    #+begin_src clojure
+      {:db {
+            ;; Default settings
+            :adapter       "mysql"
+            :database-name "baum"
+            :server-name   "localhost"
+            :port-number   3306
+            :username      "root"
+            :password      nil
+
+            ;; Override settings per ENV
+            :baum/override
+            #baum/match [#baum/env :env
+                         "prod" {:database-name "baum-prod"
+
+                                 ;; When DATABASE_HOST is defined, use it,
+                                 ;; otherwise use "localhost"
+                                 :server-name #baum/env [:database-host "localhost"]
+
+                                 ;; Same as above. DATABASE_USERNAME or "root"
+                                 :username #baum/env [:database-username "root"]
+
+                                 ;; DATABASE_PASSWORD or nil
+                                 :password #baum/env :database-password}
+                         "dev"  {:database-name "baum-dev"}
+                         "test" {:adapter "h2"}]}}
+    #+end_src
+
+*** Database settings in multiple files (w/ shorthand notation)
+
+    For details about the shorthand notation, see
+    [[#built-in-shorthand-notation][Built-in shorthand notation]].
+
+    your_ns.clj:
+
+    #+begin_src clojure
+      (ns your-ns
+        (:require [baum.core :as b]
+                  [clojure.java.io :as io]))
+
+      (def config (b/read-config (io/resource "config.edn")
+                                 {:shorthand? true}))
+    #+end_src
+
+    config.edn:
+
+    #+begin_src clojure
+      {$let [env      #env [:env "prod"]      ; "prod" is fallback value
+             env-file #str ["config-" #- env ".edn"]]
+
+       ;; If ENV is "prod", `config-default.edn` and `config-prod.edn` will
+       ;; be loaded. These files will be merged deeply (left to right).
+       $include ["config-default.edn"
+                 #- env-file]
+
+       ;; If `config-local.edn` exists, load it. You can put private config
+       ;; here.
+       $override* "config-local.edn"}
+    #+end_src
+
+    config-default.edn:
+
+    #+begin_src clojure
+      {:db {:adapter       "mysql"
+            :database-name "baum"
+            :server-name   "localhost"
+            :port-number   3306
+            :username      "root"
+            :password      nil}}
+    #+end_src
+
+    config-prod.edn:
+
+    #+begin_src clojure
+      {:db {:database-name "baum-prod"
+            :server-name   #env [:database-host "localhost"]
+            :username      #env [:database-username "root"]
+            :password      #env :database-password}}
+    #+end_src
+
+    config-dev.edn:
+
+    #+begin_src clojure
+      {:db {:database-name "baum-dev"}}
+    #+end_src
+
+    config-local.edn:
+
+    #+begin_src clojure
+      {:db {:username "foo"
+            :password "mypassword"}}
+    #+end_src
+
+** Aliasing
+
+   If built-in reader macros or special keys are verbose for you, you
+   can define aliases for them:
+
+   #+begin_src clojure
+     (read-config "path/to/config.edn"
+                  {:aliases {'baum/env 'env
+                             :baum/let '$let
+                             'baum/ref '-}})
+   #+end_src
+
+   Then you can rewrite your configuration as follows:
+
+   Before:
+   #+begin_src clojure
+     {:baum/let [user #baum/env :user
+                 loc  "home"]
+      :who   #baum/ref user
+      :where #baum/ref loc}
+   #+end_src
+
+   After:
+   #+begin_src clojure
+     {$let [user #env :user
+            loc  "home"]
+      :who   #- user
+      :where #- loc}
+   #+end_src
+
+*** Built-in shorthand notation
+
+    You can also enable built-in opinionated aliases if it is not
+    necessary to worry about the conflict for you:
+
+    #+begin_src clojure
+      (b/read-config "path/to/config.edn"
+                     {:shorthand? true})
+    #+end_src
+
+    And its content is as follows:
+
+    #+begin_src clojure
+      {'baum/env       'env
+       'baum/str       'str
+       'baum/regex     'regex
+       'baum/match     'match
+       'baum/resource  'resource
+       'baum/file      'file
+       'baum/files     'files
+       'baum/import    'import
+       'baum/import*   'import*
+       'baum/some      'some
+       'baum/eval      '=
+       'baum/ref       '-
+       'baum/inspect   'inspect
+       :baum/let       '$let
+       :baum/include   '$include
+       :baum/include*  '$include*
+       :baum/override  '$override
+       :baum/override* '$override*}
+    #+end_src
+
+    Of course, it is possible to overwrite some of them:
+
+    #+begin_src clojure
+      (b/read-config "path/to/config.edn"
+                     {:shorthand? true
+                      :aliases    {'baum/ref '|}})
+    #+end_src
+
+** Built-in Reader Macros
+
+*** #baum/env
+
+    Read environment variables:
+
+    #+begin_src clojure
+      {:foo #baum/env :user}                  ; => {:foo "rkworks"}
+    #+end_src
+
+    [[https://github.com/weavejester/environ][Environ]] is used
+    internally. So you can also read Java properties, a =.lein-env=
+    file, or your =project.clj= (you need =lein-env= plugin). For
+    more details, see Environ's README.
+
+    You can also set fallback value:
+
+    #+begin_src clojure
+      #baum/env [:non-existent-env "not-found"]       ; => "not-found"
+      #baum/env [:non-existent-env :user "not-found"] ; => "rkworks"
+      #baum/env ["foo"]                               ; => "foo"
+      #baum/env []                                    ; => nil
+
+      ;; real-world example
+      {:port #baum/env [:port 3000]}
+    #+end_src
+
+*** #baum/match
+
+    You can use pattern matching with =baum/match= thanks to
+    =core.match=.
+
+    #+begin_src clojure
+      {:database
+       #baum/match [#baum/env :env
+                    "prod" {:host     "xxxx"
+                            :user     "root"
+                            :password "aaa"}
+                    "dev"  {:host     "localhost"
+                            :user     "root"
+                            :password "bbb"}
+                    :else  {:host     "localhost"
+                            :user     "root"
+                            :password nil}]}
+    #+end_src
+
+    =baum/case= accepts a vector and passes it to
+    =clojure.core.match/match=. In the above example, if
+    =#baum/env :env= is "prod", the result is:
+
+    #+begin_src clojure
+      {:database {:host     "xxxx"
+                  :user     "root"
+                  :password "aaa"}}
+    #+end_src
+
+    If the value is neither "prod" nor "dev", the result is:
+
+    #+begin_src clojure
+      {:database {:host     "localhost"
+                  :user     "root"
+                  :password nil}}
+    #+end_src
+
+    You can use more complex patterns:
+
+    #+begin_src clojure
+      #baum/match [[#baum/env :env
+                    #baum/env :user]
+                   ["prod" _]        :prod-someone
+                   ["dev" "rkworks"] :dev-rkworks
+                   ["dev" _]         :dev-someone
+                   :else             :unknown]
+    #+end_src
+
+    For more details, see the documentations of
+    [[https://github.com/clojure/core.match][core.match]].
+
+*** #baum/file
+
+    To embed File objects in your configuration files, you can use
+    =baum/file=:
+
+    #+begin_src clojure
+      {:file #baum/file "project.clj"}      ; => {:file #<File project.clj>}
+    #+end_src
+
+*** #baum/resource
+
+    Your can also refer resouce files via =baum/resource=:
+
+    #+begin_src clojure
+      {:resource #baum/resource "config.edn"}
+      ;; => {:resource #<URL file:/path/to/project/resources/config.edn>}
+    #+end_src
+
+*** #baum/files
+
+    You can obtain a list of all files in a direcotry by using
+    =baum/files=:
+
+    #+begin_src clojure
+      #baum/files "src"
+      ;; => [#<File src/baum/core.clj> #<File src/baum/util.clj>]
+    #+end_src
+
+    You can also filter the list if you need to:
+
+    #+begin_src clojure
+      #baum/files ["." "\\.clj$"]
+      ;; => [#<File ./project.clj>
+      ;;     #<File ./src/baum/core.clj>
+      ;;     #<File ./src/baum/util.clj>
+      ;;     #<File ./test/baum/core_test.clj>]
+    #+end_src
+
+*** #baum/regex
+
+    To get an instance of =java.util.regex.Pattern=, use
+    =#baum/regex=:
+
+    #+begin_src clojure
+      #baum/regex "^foo.*\\.clj$"       ; => #"^foo.*\.clj$"
+    #+end_src
+
+    It is useful only when you use the EDN reader because EDN does not
+    support regex literal.
+
+*** #baum/import
+
+    You can use =baum/import= to import config from other files.
+
+    child.edn:
+
+    #+begin_src clojure
+      {:child-key :child-val}
+    #+end_src
+
+    parent.edn:
+
+    #+begin_src clojure
+      {:parent-key #baum/import "path/to/child.edn"}
+      ;; => {:parent-key {:child-key :child-val}}
+    #+end_src
+
+    If you want to import a resouce file, use =baum/resource= together:
+
+    #+begin_src clojure
+      {:a #baum/import #baum/resource "config.edn"}
+    #+end_src
+
+    The following example shows how to import all files under certain
+    directory:
+
+    #+begin_src clojure
+      #baum/import #baum/files ["config" "\\.edn$"]
+    #+end_src
+
+    *NB:* The reader throws an exception if you try to import a non existent file.
+
+*** #baum/import*
+
+    Same as =baum/import=, but returns nil when error occurs:
+
+    #+begin_src clojure
+      {:a #baum/import* "non-existent-config.edn"} ; => {:a nil}
+    #+end_src
+
+*** #baum/some
+
+    =baum/some= returns the first logical true value of a given
+    vector:
+
+    #+begin_src clojure
+      #baum/some [nil nil 1 nil]              ; => 1
+
+      #baum/some [#baum/env :non-existent-env
+                  #baum/env :user]            ; => "rkworks"
+
+    #+end_src
+
+    In the following example, if =~/.private-conf.clj= exists, the
+    result is its content, otherwise =:not-found=
+
+    #+begin_src clojure
+      #baum/some [#baum/import* "~/.private-conf.clj"
+                  :not-found]
+    #+end_src
+
+*** #baum/str
+
+    Concatenating strings:
+
+    #+begin_src clojure
+      #baum/str [#baum/env :user ".edn"]      ; => "rkworks.edn"
+    #+end_src
+
+*** #baum/eval
+
+    To embed Clojure code in your configuration files, use
+    =baum/eval=:
+
+    #+begin_src clojure
+      {:timeout #baum/eval (* 1000 60 60 24 7)} ; => {:timeout 604800000}
+    #+end_src
+
+    When =clojure.tools.reader/*read-eval*= is false, =#baum/eval= is
+    disabled.
+
+*** #baum/ref
+
+    You can refer bound variables with =baum/ref=. For more details,
+    see the explanation of [[#baumlet][:baum/let]].
+
+    You can also refer global variables:
+
+    #+begin_src clojure
+      {:hostname #baum/ref HOSTNAME}          ; => {:hostname "foobar.local"}
+    #+end_src
+
+    Built-in global variables are defined as follows:
+
+    | Symbol      | Summary      |
+    |-------------+--------------|
+    | HOSTNAME    | host name    |
+    | HOSTADDRESS | host address |
+
+    It is easy to add a new variable. Just implement a new method of
+    multimethod =refer-global-variable=:
+
+    #+begin_src clojure
+      (defmethod c/refer-global-variable 'HOME [_]
+        (System/getProperty "user.home"))
+    #+end_src
+
+
+*** #baum/inspect
+
+    =#baum/inspect= is useful for debugging:
+
+    #+begin_src clojure
+      ;;; config.edn
+
+      {:foo #baum/inspect {:baum/include [{:a :b} {:c :d}]
+                           :a :foo
+                           :b :bar}
+       :bar :baz}
+
+
+      ;;; your_ns.clj
+
+      (b/read-config "config.edn")
+      ;; This returns {:bar :baz, :foo {:a :foo, :b :bar, :c :d}}
+      ;; and prints:
+      ;;
+      ;;  {:baum/include [{:a :b} {:c :d}], :a :foo, :b :bar}
+      ;;
+      ;;  ↓ ↓ ↓
+      ;;
+      ;;  {:b :bar, :c :d, :a :foo}
+      ;;
+
+    #+end_src
+
+** Built-in Reducers
+
+*** :baum/include
+
+    =:baum/include= key deeply merges its child with its owner map.
+
+    For example:
+
+    #+begin_src clojure
+      {:baum/include {:a :child}
+       :a :parent}                        ; => {:a :parent}
+    #+end_src
+
+    In the above example, a reducer merges ={:a :parent}= into
+    ={:a :child}=.
+
+    =:baum/include= also accepts a vector:
+
+    #+begin_src clojure
+      {:baum/include [{:a :child1} {:a :child2}]
+       :b :parent}                            ; => {:a :child2 :b :parent}
+    #+end_src
+
+    In this case, the merging strategy is like the following:
+
+    #+begin_src clojure
+      (deep-merge {:a :child1} {:a :child2} {:b :parent})
+    #+end_src
+
+    Finally, it accepts all other importable values.
+
+    For example:
+
+    #+begin_src clojure
+      ;; child.edn
+      {:a :child
+       :b :child}
+
+      ;; config.edn
+      {:baum/include "path/to/child.edn"
+       :b :parent}                            ; => {:a :child :b :parent}
+    #+end_src
+
+    Of course it is possible to pass a vector of importable values:
+
+    #+begin_src clojure
+      {:baum/include ["child.edn"
+                      #baum/resource "resource.edn"]
+       :b :parent}
+    #+end_src
+
+*** :baum/include*
+
+    Same as =:baum/include=, but ignores importing errors:
+
+    #+begin_src clojure
+      ;; child.edn
+      {:foo :bar}
+
+      ;; config.edn
+      {:baum/include* ["non-existent-file.edn" "child.edn"]
+       :parent :qux}                          ; => {:foo :bar :parent :qux}
+    #+end_src
+
+    It is equivalent to the following operation:
+
+    #+begin_src clojure
+      (deep-merge nil {:foo :bar} {:parent :qux})
+    #+end_src
+
+*** :baum/override
+
+    The only difference between =:baum/override= and =:baum/include=
+    is the merging strategy. In contrast to =:baum/include=,
+    =:baum/override= merges child values into a parent map.
+
+    In the next example, a reducer merges ={:a :child}= into
+    ={:a :parent}=.
+
+    #+begin_src clojure
+      {:baum/override {:a :child}
+       :a :parent}                            ; => {:a :child}
+    #+end_src
+
+*** :baum/override*
+
+    Same as =:baum/override=, but ignores importing errors. See also
+    =:baum/include*=.
+
+*** :baum/let
+
+    You can use =:baum/let= and =baum/ref= to make a part of your
+    config reusable:
+
+    #+begin_src clojure
+      {:baum/let [a 100]
+       :a #baum/ref a
+       :b {:c #baum/ref a}}            ; => {:a 100 :b {:c 100}}
+    #+end_src
+
+    Destructuring is available:
+
+    #+begin_src clojure
+      {:baum/let [{:keys [a b]}  {:a 100 :b 200}]
+                :a #baum/ref a
+                :b #baum/ref b}
+      ;; => {:a 100 :b 200}
+
+      {:baum/let [[a b] [100 200]]
+       :a #baum/ref a
+       :b #baum/ref b}
+      ;; => {:a 100 :b 200}
+    #+end_src
+
+    Of course, you can use other reader macros together:
+
+    #+begin_src clojure
+      ;;; a.edn
+      {:foo :bar :baz :qux}
+
+      ;;; config.edn
+      {:baum/let [{:keys [foo baz]} #baum/import "a.edn"]
+       :a #baum/ref foo
+       :b #baum/ref baz}
+      ;; => {:a :bar :b :qux}
+    #+end_src
+
+    =baum/let='s scope is determined by hierarchical structure of
+    config maps:
+
+    #+begin_src clojure
+      {:baum/let [a :a
+                  b :b]
+       :d1 {:baum/let [a :d1-a
+                       c :d1-c]
+            :a #baum/ref a
+            :b #baum/ref b
+            :c #baum/ref c}
+       :a #baum/ref a
+       :b #baum/ref b}
+      ;; => {:d1 {:a :d1-a
+      ;;          :b :b
+      ;;          :c :d1-c}
+      ;;     :a  :a
+      ;;     :b  :b}
+    #+end_src
+
+    You will get an error if you try to access an unavailable
+    variable:
+
+    #+begin_src clojure
+      {:a #baum/ref a
+       :b {:baum/let [a 100]}}
+      ;; => Error: "Unable to resolve symbol: a in this context"
+    #+end_src
+
+** Writing your own reader macros
+
+   It is very easy to write reader macros. To write your own, use
+   =defreader=.
+
+   config.edn:
+
+   #+begin_src clojure
+     {:foo #greet "World"}
+   #+end_src
+
+   your_ns.clj:
+
+   #+begin_src clojure
+     (ns your-ns
+       (:require [baum.core :as b]))
+
+     (b/defreader greeting-reader [v opts]
+       (str "Hello, " v "!"))
+
+     ;; Put your reader macro in reader options:
+     (b/read-config "config.edn"
+                    {:readers {'greet greeting-reader}}) ; => {:foo "Hello, World!"}
+
+     ;; Another way to enable your macro:
+     (binding [*data-readers* (merge *data-readers*
+                                     {'greet greeting-reader})]
+       (b/read-config "config.edn"))
+   #+end_src
+
+   For more complex examples, see implementations of built-in
+   readers.
+
+*** Differences from Clojure's reader macro definition
+
+    If you have ever written reader macros, you may wonder why you
+    should use =defreader= to define them even though they are
+    simple unary functions.
+
+    This is because it is necessary to synchronize the evaluation
+    timing of reducers and reader macros. To achieve this,
+    =defreader= expands a definition of a reader macro like the
+    following:
+
+    #+begin_src clojure
+      (defreader greeting-reader [v opts]
+        (str "Hello, " v "!"))
+
+      ;;; ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+
+      (let [f (fn [v opts]
+                (str "Hello, " v "!"))]
+        (defn greeting-reader [v]
+          {:baum.core/invoke [f v]}))
+    #+end_src
+
+    So, the actual evaluation timing of your implementation is the
+    reduction phase and this is performed by an internal built-in
+    reducer.
+
+    One more thing, you can access reader options!
+
+** Writing your own reducers
+
+   In contrast to reader macros, there is no macro to define reducers.
+   All you need to do is define a ternary function. Consider the
+   following reducer:
+
+   #+begin_src clojure
+     {:your-ns/narrow [:a :c]
+      :a :foo
+      :b :bar
+      :c :baz
+      :d :qux}
+
+     ;;; ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+
+     {:a :foo
+      :c :baz}
+   #+end_src
+
+   To implement this, you could write as follows:
+
+   #+begin_src clojure
+     (ns your-ns
+       (:require [baum.core :as b]))
+
+     (defn narrow [v m opts]
+       (select-keys m v))
+
+     ;; Put your reducer in reader options:
+     (b/read-config "config.edn"
+                    {:reducers {:your-ns/narrow greeting-reader}})
+   #+end_src
+
+   In the above example, =v= is a value under the =:your-ns/narrow=
+   key and =m= is a map from which the =:your-ns/narrow= key has been
+   removed. =opts= is reader options. So =narrow= will be called as
+   follows:
+
+   #+begin_src clojure
+     (narrow [:a :c]
+             {:a :foo :b :bar :c :baz :d :qux}
+             {...})
+   #+end_src
+
+   By the way, the trigger key does not have to be a keyword. Therefore, you
+   can write, for example, it as follows:
+
+   #+begin_src clojure
+     ;;; config.edn
+     {narrow [:a :c]
+      :a :foo
+      :b :bar
+      :c :baz
+      :d :qux}
+
+     ;;; your_ns.clj
+     (b/read-config "config.edn"
+                    {:reducers {'narrow greeting-reader}})
+   #+end_src
+
+** License
+
+   Copyright © 2015 Ryo Fukumuro
+
+   Distributed under the Eclipse Public License, the same as Clojure.

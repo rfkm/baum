@@ -1,0 +1,14 @@
+machine:
+  java:
+    version: oraclejdk7
+dependencies:
+  override:
+    - lein all deps
+test:
+  override:
+    - lein all midje
+deployment:
+  snapshot:
+    branch: master
+    commands:
+      - lein deploy snapshots
