@@ -1,6 +1,6 @@
 * Baum
 
-  [[https://circleci.com/gh/rkworks/baum][https://circleci.com/gh/rkworks/baum.svg?style=svg&circle-token=28eaca8bfec84f4b9efbc4a07c3a4745fe478020]]
+  [[https://circleci.com/gh/rkworks/baum][https://circleci.com/gh/rkworks/baum.svg?style=svg]]
 
   *Baum* is an extended Clojure reader designed to create
   self-contained configuration files.
@@ -27,10 +27,8 @@
 ** Setup
 
    Add the following dependency in your =project.clj= file:
-
-   #+begin_src clojure
-     [rkworks/baum "0.1.0-SNAPSHOT"]
-   #+end_src
+   
+   [[http://clojars.org/rkworks/baum][http://clojars.org/rkworks/baum/latest-version.svg]]
 
 ** Reading your config file
 
