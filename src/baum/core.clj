@@ -158,7 +158,7 @@
                                h))))
                   opts))
 
-(defn- reduction
+(defn reduction
   [m opts]
   (let [reducers (:reducers opts)
         new-m    (apply-lazy-reducer reducers m opts)]
