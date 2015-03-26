@@ -1,4 +1,4 @@
-(defproject rkworks/baum "0.1.0"
+(defproject rkworks/baum "0.1.1-SNAPSHOT"
   :description "An extended Clojure reader designed to create self-contained configuration files"
   :url "https://github.com/rkworks/baum"
   :license {:name "Eclipse Public License"
