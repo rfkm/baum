@@ -1,4 +1,4 @@
-(defproject rkworks/baum "0.1.0-SNAPSHOT"
+(defproject rkworks/baum "0.1.0"
   :description "An extended Clojure reader designed to create self-contained configuration files"
   :url "https://github.com/rkworks/baum"
   :license {:name "Eclipse Public License"
@@ -7,7 +7,9 @@
   :repositories {"sonatype-oss-public" "https://oss.sonatype.org/content/groups/public/"}
   :deploy-repositories [["snapshots" {:url "https://clojars.org/repo/"
                                       :username [:gpg :env]
-                                      :password [:gpg :env]}]]
+                                      :password [:gpg :env]}]
+                        ["releases" {:url "https://clojars.org/repo/"
+                                     :creds :gpg}]]
   :dependencies [[environ "1.0.0"]
                  [me.raynes/fs "1.4.6"]
                  [org.clojure/clojure "1.6.0"]
