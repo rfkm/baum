@@ -27,7 +27,7 @@
 ** Setup
 
    Add the following dependency in your =project.clj= file:
-   
+
    [[http://clojars.org/rkworks/baum][http://clojars.org/rkworks/baum/latest-version.svg]]
 
 ** Reading your config file
@@ -763,7 +763,7 @@
      (ns your-ns
        (:require [baum.core :as b]))
 
-     (defn narrow [v m opts]
+     (defn narrow [m v opts]
        (select-keys m v))
 
      ;; Put your reducer in reader options:

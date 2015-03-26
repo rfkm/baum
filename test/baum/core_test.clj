@@ -317,7 +317,7 @@
 
     (fact "custom special key"
       (@#'c/reduction {:foo/bar :a}
-                      {:reducers {:foo/bar (fn [v m opts]
+                      {:reducers {:foo/bar (fn [m v opts]
                                              (assoc m :foo/bar :foo))}})
       => {:foo/bar :foo})))
 

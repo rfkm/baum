@@ -131,7 +131,7 @@
   (let [key-set (set (keys reducers))]
     (reduce (fn [acc-m k]
               (if-let [f (get-reducer reducers k)]
-                (f (acc-m k) (dissoc acc-m k) opts)
+                (f (dissoc acc-m k) (acc-m k) opts)
                 acc-m))
             m
             (or (and (map? m)
@@ -179,19 +179,19 @@
 ;;; Reducers
 ;;;
 
-(defn- reduce-invoke [[f v] m opts]
+(defn- reduce-invoke [m [f v] opts]
   (f v opts))
 
-(defn- reduce-include [v m opts]
+(defn- reduce-include [m v opts]
   (import-config (conj (u/vectorize v) m) opts))
 
-(defn- reduce-include* [v m opts]
+(defn- reduce-include* [m v opts]
   (import-config* (conj (u/vectorize v) m) opts))
 
-(defn- reduce-override [v m opts]
+(defn- reduce-override [m v opts]
   (import-config (into [m] (u/vectorize v)) opts))
 
-(defn- reduce-override* [v m opts]
+(defn- reduce-override* [m v opts]
   (import-config* (into [m] (u/vectorize v)) opts))
 
 (defn- eval-bindings [bindings]
@@ -219,7 +219,7 @@
          (#(reduce-bindings % opts unsafe))
          (apply hash-map))))
 
-(defn- reduce-let [v m opts]
+(defn- reduce-let [m v opts]
   (with-meta m {::context (create-context v opts)}))
 
 
