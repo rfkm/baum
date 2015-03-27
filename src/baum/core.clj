@@ -80,9 +80,6 @@
 (deflazyreader if-reader [[test then & [else]] opts]
   (reduction (if (reduction test opts) then else) opts))
 
-(deflazyreader when-reader [[test then] opts]
-  (when (reduction test opts) (reduction then opts)))
-
 (deflazyreader match-reader [[vars & clauses] opts]
   (let [cs        (partition 2 clauses)
         saved     (reduce (fn [acc [_ v]]
