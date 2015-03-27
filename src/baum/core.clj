@@ -77,6 +77,12 @@
   (let [vs (u/vectorize v)]
     (u/some+ #(reduction % opts) vs)))
 
+(deflazyreader if-reader [[test then & [else]] opts]
+  (reduction (if (reduction test opts) then else) opts))
+
+(deflazyreader when-reader [[test then] opts]
+  (when (reduction test opts) (reduction then opts)))
+
 (deflazyreader match-reader [[vars & clauses] opts]
   (let [cs        (partition 2 clauses)
         saved     (reduce (fn [acc [_ v]]
@@ -262,19 +268,20 @@
   (w/postwalk-replace {:baum/nil nil} m))
 
 (defn default-readers [& [opts]]
-  {'baum/env       env-reader
-   'baum/str       str-reader
-   'baum/regex     regex-reader
-   'baum/match     match-reader
-   'baum/resource  resource-reader
-   'baum/file      file-reader
-   'baum/files     files-reader
-   'baum/import    import-reader
-   'baum/import*   import-reader*
-   'baum/some      some-reader
-   'baum/eval      eval-reader
-   'baum/ref       ref-reader
-   'baum/inspect   inspect-reader})
+  {'baum/env      env-reader
+   'baum/str      str-reader
+   'baum/regex    regex-reader
+   'baum/if       if-reader
+   'baum/match    match-reader
+   'baum/resource resource-reader
+   'baum/file     file-reader
+   'baum/files    files-reader
+   'baum/import   import-reader
+   'baum/import*  import-reader*
+   'baum/some     some-reader
+   'baum/eval     eval-reader
+   'baum/ref      ref-reader
+   'baum/inspect  inspect-reader})
 
 (defn default-reducers [& [opts]]
   {::invoke        reduce-invoke         ; internal
@@ -289,6 +296,7 @@
   {'baum/env       'env
    'baum/str       'str
    'baum/regex     'regex
+   'baum/if        'if
    'baum/match     'match
    'baum/resource  'resource
    'baum/file      'file

@@ -53,6 +53,10 @@
   (fact "str"
     (rs "#baum/str [\"foo\" \"bar\"]") => "foobar")
 
+  (fact "if"
+    (rs "#baum/if [#baum/env :user :foo #baum/eval (throw (Exception. \"foo\"))]") => :foo
+    (rs "#baum/if [#baum/env :non-existent #baum/eval (throw (Exception. \"foo\")) :foo]") => :foo)
+
   (fact "match"
     (let [s "{:a #baum/match [[#baum/env :env 0]
                              [\"dev\" 0]  {:a :a}

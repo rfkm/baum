@@ -231,6 +231,7 @@
       {'baum/env       'env
        'baum/str       'str
        'baum/regex     'regex
+       'baum/if        'if
        'baum/match     'match
        'baum/resource  'resource
        'baum/file      'file
@@ -281,6 +282,24 @@
 
       ;; real-world example
       {:port #baum/env [:port 3000]}
+    #+end_src
+
+*** #baum/if
+
+    You can use a conditional sentence:
+
+    #+begin_src clojure
+      {:port #baum/if [#baum/env :dev
+                       3000                   ; => for dev
+                       8080                   ; => for prod
+                       ]}
+    #+end_src
+
+    A then clause is optional:
+
+    #+begin_src clojure
+      {:port #baum/if [nil
+                       3000]}                 ; => {:port nil}
     #+end_src
 
 *** #baum/match
