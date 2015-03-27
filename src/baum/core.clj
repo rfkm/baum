@@ -81,16 +81,10 @@
   (reduction (if (reduction test opts) then else) opts))
 
 (deflazyreader match-reader [[vars & clauses] opts]
-  (let [cs        (partition 2 clauses)
-        saved     (reduce (fn [acc [_ v]]
-                            (assoc acc (keyword (gensym)) v))
-                          {}
-                          cs)
-        saved-inv (set/map-invert saved)
-        clauses   (mapcat (fn [[c a]]
-                            [c (get saved-inv a)])
-                          cs)]
-    (get saved (eval `(m/match ~(reduction vars opts) ~@clauses)))))
+  (let [protect #(mapcat (fn [[k v]]
+                           [k (list 'quote v)])
+                         (partition 2 %))]
+    (eval `(m/match ~(reduction vars opts) ~@(protect clauses)))))
 
 (declare refer-global-variable)
 
@@ -197,29 +191,22 @@
 (defn- reduce-override* [m v opts]
   (import-config* (into [m] (u/vectorize v)) opts))
 
-(defn- eval-bindings [bindings]
-  (let [syms (vec (take-nth 2 bindings))
-        qs   (mapv (fn [sym] `(~'quote ~sym)) syms)]
-    (eval `(let ~bindings
-             (interleave ~qs ~syms)))))
-
-
-(defn- reduce-bindings [bindings opts unsafe]
+(defn- reduce-bindings [bindings opts]
   (reduce (fn [acc [k v]]
             (binding [*context* (merge *context*
                                        (apply hash-map acc))]
-              (let [v (if (unsafe v)
-                        (list 'quote (reduction v opts))
-                        v)]
-                (conj acc k (eval `(let ~acc ~v))))))
+              (conj acc k (eval `(let ~acc ~(reduction v opts))))))
           []
           (partition 2 bindings)))
 
 (defn- create-context [bindings opts]
-  (let [unsafe (set (take-nth 2 (rest bindings)))]
+  (let [protect #(mapcat (fn [[k v]]
+                           [k (list 'quote v)])
+                         (partition 2 %))]
     (->> bindings
+         protect
          destructure
-         (#(reduce-bindings % opts unsafe))
+         (#(reduce-bindings % opts))
          (apply hash-map))))
 
 (defn- reduce-let [m v opts]

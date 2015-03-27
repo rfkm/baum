@@ -73,6 +73,10 @@
 
       (rs "{:a #baum/match [#baum/env :env]}") => (throws #"No matching clause")))
 
+  (fact "match is safe"
+    (rs "#baum/match [:a
+                     :a (str \"foo\" \"bar\")]") => '(str "foo" "bar"))
+
   (fact "resource"
     (rs "{:a #baum/resource \"test.edn\"}") => {:a (io/resource "test.edn")})
 
@@ -359,6 +363,14 @@
              :c :d1-c}
         :a :a
         :b :b})
+
+  (fact "safe"
+    (rs "{:baum/let [a (str \"a\" \"b\")
+                     a (str #baum/ref a \"c\")
+                     a (str #baum/ref a \"d\")
+                     a (str #baum/ref a \"e\")]
+          :a #baum/ref a}")
+    => {:a '(str (str (str (str "a" "b") "c") "d") "e")})
 
   (fact "global variable"
     (defmethod c/refer-global-variable 'FOO [_] :foo)
