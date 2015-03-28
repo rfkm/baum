@@ -81,9 +81,7 @@
   (reduction (if (reduction test opts) then else) opts))
 
 (deflazyreader match-reader [[vars & clauses] opts]
-  (let [protect #(mapcat (fn [[k v]]
-                           [k (list 'quote v)])
-                         (partition 2 %))]
+  (let [protect (partial u/map-every-nth #(list 'quote %) 2)]
     (eval `(m/match ~(reduction vars opts) ~@(protect clauses)))))
 
 (declare refer-global-variable)
@@ -200,14 +198,12 @@
           (partition 2 bindings)))
 
 (defn- create-context [bindings opts]
-  (let [protect #(mapcat (fn [[k v]]
-                           [k (list 'quote v)])
-                         (partition 2 %))]
-    (->> bindings
-         protect
-         destructure
-         (#(reduce-bindings % opts))
-         (apply hash-map))))
+  (let [protect (partial u/map-every-nth #(list 'quote %) 2)]
+    (-> bindings
+        protect
+        destructure
+        (reduce-bindings opts)
+        (->> (apply hash-map)))))
 
 (defn- reduce-let [m v opts]
   (with-meta m {::context (create-context v opts)}))

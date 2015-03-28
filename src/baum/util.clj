@@ -10,6 +10,13 @@
 (defn fmap [f m]
   (into {} (for [[k v] m] [k (f v)])))
 
+(defn map-every-nth [f n coll]
+  (map-indexed (fn [i v]
+                 (if (zero? (mod (inc i) n))
+                   (f v)
+                   v))
+               coll))
+
 (defn some+
   "Like `some` but handles :baum/nil as nil."
   [pred coll]
