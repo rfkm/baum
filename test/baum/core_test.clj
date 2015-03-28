@@ -178,10 +178,14 @@
       (slurp "dev-resources/foo.edn") => "{:a #foo :b}"))
 
   (fact "readers can return nil"
-    ;; Normally EDN reader throws an exception if a reader macro
-    ;; returns nil.
-    (rs {:readers {'void (constantly nil)}}
-        "{:a #void :b}") => {:a nil}))
+    (c/defreader void-reader [v opts] nil)
+    (c/deflazyreader void-lazy-reader [v opts] nil)
+    (rs {:readers {'void void-reader}}
+        "{:a #void :b}")
+    => {:a nil}
+    (rs {:readers {'void void-lazy-reader}}
+        "{:a #void :b}")
+    => {:a nil}))
 
 
 (facts "can read config files with special keys"

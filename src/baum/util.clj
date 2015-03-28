@@ -17,12 +17,6 @@
                    v))
                coll))
 
-(defn some+
-  "Like `some` but handles :baum/nil as nil."
-  [pred coll]
-  (some (fn [v]
-          (pred (when-not (= v :baum/nil) v))) coll))
-
 (defn vectorize [v]
   (if (vector? v) v [v]))
 

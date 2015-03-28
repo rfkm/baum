@@ -75,7 +75,7 @@
 
 (deflazyreader some-reader [v opts]
   (let [vs (u/vectorize v)]
-    (u/some+ #(reduction % opts) vs)))
+    (some #(reduction % opts) vs)))
 
 (deflazyreader if-reader [[test then & [else]] opts]
   (reduction (if (reduction test opts) then else) opts))
@@ -233,20 +233,6 @@
           m
           (:transformers opts)))
 
-(defn wrap-nil-safe-reader
-  "Returns nil-safe version of a given reader function. If a reader
-  function returns falsy value, replace it with a pseudo
-  nil, :baum/nil. Otherwise the EDN reader will throw an exception."
-  [f]
-  (fn [& args]
-    (or (apply f args)
-        :baum/nil)))
-
-(defn replace-pseudo-nils
-  "Replace all pseudo nils(:baum/nil) in m with real nils."
-  [m opts]
-  (w/postwalk-replace {:baum/nil nil} m))
-
 (defn default-readers [& [opts]]
   {'baum/env      env-reader
    'baum/str      str-reader
@@ -294,8 +280,7 @@
    :baum/override* '$override*})
 
 (defn default-transformers [& [opts]]
-  [replace-pseudo-nils
-   reduction])
+  [reduction])
 
 (defn default-options [opts]
   {:readers      (merge (default-readers opts)
@@ -319,7 +304,6 @@
 (defn update-options [opts]
   (-> (default-options opts)
       (u/deep-merge (or opts {}))
-      (update-in [:readers] #(u/fmap wrap-nil-safe-reader %))
       (update-in [:transformers] concat (default-transformers opts))
       apply-default-aliases
       apply-aliases))
