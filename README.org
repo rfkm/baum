@@ -132,8 +132,7 @@
         (:require [baum.core :as b]
                   [clojure.java.io :as io]))
 
-      (def config (b/read-config (io/resource "config.edn")
-                                 {:shorthand? true}))
+      (def config (b/read-config (io/resource "config.edn")))
     #+end_src
 
     config.edn:
