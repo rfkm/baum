@@ -217,12 +217,13 @@
 
 *** Built-in shorthand notation
 
-    You can also enable built-in opinionated aliases if it is not
-    necessary to worry about the conflict for you:
+    You can use built-in opinionated aliases if it is not necessary to
+    worry about the conflict for you. The shorthand notation is
+    enabled by default, but you can disable it if you need:
 
     #+begin_src clojure
       (b/read-config "path/to/config.edn"
-                     {:shorthand? true})
+                     {:shorthand? false})
     #+end_src
 
     And its content is as follows:
@@ -253,8 +254,7 @@
 
     #+begin_src clojure
       (b/read-config "path/to/config.edn"
-                     {:shorthand? true
-                      :aliases    {'baum/ref '|}})
+                     {:aliases    {'baum/ref '|}})
     #+end_src
 
 ** Built-in Reader Macros

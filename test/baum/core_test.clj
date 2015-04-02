@@ -406,7 +406,15 @@
           :who #- user
           :where #baum/ref loc}")
     => {:who "rkworks" :where "home"}
-    (provided (env :user) => "rkworks")))
+    (provided (env :user) => "rkworks"))
+
+  (fact "Disable built-in aliases"
+    (rs {:shorthand? false}
+        "{$let [user #env :user
+                loc  \"home\"]
+          :who #- user
+          :where #baum/ref loc}")
+    => (throws Exception)))
 
 (facts "Complex examples"
   (fact ":baum/include + #baum/match"

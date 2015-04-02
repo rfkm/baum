@@ -288,7 +288,7 @@
    :reducers     (default-reducers opts)
    :transformers []
    :aliases      {}
-   :shorthand?  false
+   :shorthand?  true
    :edn?        false})
 
 (defn apply-aliases [{:keys [aliases] :as opts}]
