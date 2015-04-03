@@ -2,27 +2,31 @@
 
   [[https://circleci.com/gh/rkworks/baum][https://circleci.com/gh/rkworks/baum.svg?style=svg]]
 
-  *Baum* is an extended Clojure reader designed to create
-  self-contained configuration files.
+  *Baum* is an extensible EDSL in EDN for building self-contained
+  configuration files.
 
   It is built on top of
   [[https://github.com/clojure/tools.reader][clojure.tools.reader]]
   and offers following features.
 
+  - Providing a basic mechanism for building simple and extensible DSL
+    in EDN
+    - Reader macros
+    - Post-parsing reductions
+      - A transformation of a map which has a special key to trigger it
+  - Built-in DSL for writing modular and portable configuration files
+    - Access to environment variables, Java system properties,
+      =project.clj=, and so on (powered by [[https://github.com/weavejester/environ][Environ]])
+    - Importing external files
+    - Local variables
+    - Extensible global variables
+    - Conditional evaluation
+      - if, some, match, ...
+      - This allows you to write environment specific configurations.
+    - etc...
   - Selectable reader
     - A complete Clojure reader (=clojure.tools.reader/read-string=)
     - An EDN-only reader (=clojure.tools.reader.edn/read-string=)
-  - Access to environment variables, Java system properties,
-    =project.clj=, and so on (powered by [[https://github.com/weavejester/environ][Environ]])
-  - Importing external files
-  - Local variables
-  - Extensible global variables
-  - Conditional evaluation
-    - This allows you to write environment specific configurations.
-  - etc...
-
-  It achieves these features by reader macros and post-parsing
-  reduction.
 
 ** Setup
 

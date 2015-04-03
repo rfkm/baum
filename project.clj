@@ -1,5 +1,5 @@
 (defproject rkworks/baum "0.1.4-SNAPSHOT"
-  :description "An extended Clojure reader designed to create self-contained configuration files"
+  :description "Extensible EDSL in EDN for building self-contained configuration files"
   :url "https://github.com/rkworks/baum"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
