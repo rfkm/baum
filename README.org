@@ -786,12 +786,12 @@
 
      ;; Put your reducer in reader options:
      (b/read-config "config.edn"
-                    {:reducers {:your-ns/narrow greeting-reader}})
+                    {:reducers {:your-ns/narrow narrow}})
    #+end_src
 
    In the above example, =v= is a value under the =:your-ns/narrow=
    key and =m= is a map from which the =:your-ns/narrow= key has been
-   removed. =opts= is reader options. So =narrow= will be called as
+   removed. =opts= holds reader options. So =narrow= will be called as
    follows:
 
    #+begin_src clojure
@@ -813,7 +813,7 @@
 
      ;;; your_ns.clj
      (b/read-config "config.edn"
-                    {:reducers {'narrow greeting-reader}})
+                    {:reducers {'narrow narrow}})
    #+end_src
 
 ** License
