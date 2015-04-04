@@ -1,5 +1,6 @@
 (ns baum.core-test
   (:require [baum.core :as c]
+            baum.dummy
             [clojure.java.io :as io]
             [clojure.tools.reader :as r]
             [environ.core :refer [env]]
@@ -110,7 +111,6 @@
     (provided (env :user) => "rkworks"))
 
   (fact "resolve"
-    (require 'baum.dummy)
     (let [v baum.dummy/foo]
       (remove-ns 'baum.dummy)
       @(rs "#baum/resolve baum.dummy/foo") => v))
