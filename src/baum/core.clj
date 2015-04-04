@@ -73,6 +73,9 @@
                     {:value v})))
   (eval v))
 
+(defreader resolve-reader [v opts]
+  (u/resolve-var! v))
+
 (deflazyreader some-reader [v opts]
   (let [vs (u/vectorize v)]
     (some #(reduction % opts) vs)))
@@ -245,6 +248,7 @@
    'baum/import   import-reader
    'baum/import*  import-reader*
    'baum/some     some-reader
+   'baum/resolve  resolve-reader
    'baum/eval     eval-reader
    'baum/ref      ref-reader
    'baum/inspect  inspect-reader})
@@ -270,6 +274,7 @@
    'baum/import    'import
    'baum/import*   'import*
    'baum/some      'some
+   'baum/resolve   'resolve
    'baum/eval      '=
    'baum/ref       '-
    'baum/inspect   'inspect

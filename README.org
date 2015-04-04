@@ -243,6 +243,7 @@
        'baum/import    'import
        'baum/import*   'import*
        'baum/some      'some
+       'baum/resolve   'resolve
        'baum/eval      '=
        'baum/ref       '-
        'baum/inspect   'inspect
@@ -473,6 +474,14 @@
 
     #+begin_src clojure
       #baum/str [#baum/env :user ".edn"]      ; => "rkworks.edn"
+    #+end_src
+
+*** #baum/resolve
+
+    =baum/resolve= resolves a given symbol and resturns a var:
+
+    #+begin_src clojure
+      {:handler #baum/resolve my-ns.routes/main-route} ; => {:handler #'my-ns.routes/main-route}
     #+end_src
 
 *** #baum/eval

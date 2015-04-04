@@ -5,6 +5,7 @@
             [environ.core :refer [env]]
             [midje.sweet :refer :all]))
 
+
 ;;;
 ;;; prep
 ;;;
@@ -108,6 +109,11 @@
     => "rkworks"
     (provided (env :user) => "rkworks"))
 
+  (fact "resolve"
+    (require 'baum.dummy)
+    (let [v baum.dummy/foo]
+      (remove-ns 'baum.dummy)
+      @(rs "#baum/resolve baum.dummy/foo") => v))
 
   (fact "eval"
     (rs "{:a #baum/eval (+ 1 2)}") => {:a 3})

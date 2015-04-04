@@ -1,5 +1,6 @@
 (ns baum.util
-  (:require [me.raynes.fs :as fs]))
+  (:require [me.raynes.fs :as fs])
+  (:import java.io.FileNotFoundException))
 
 (defn deep-merge
   [& vals]
@@ -32,3 +33,23 @@
   (if (string? path)
     (fs/expand-home path)
     path))
+
+(defn- parse-ns-var! [ns-var]
+  (if-let [ns (namespace (symbol ns-var))]
+    [(symbol ns) (symbol (name ns-var))]
+    (throw (IllegalArgumentException.
+            (str "Invalid format:\n\n\t"
+                 ns-var
+                 "\n\nns-var must be of the form: '<namespace>/<var-name>'.")))))
+
+(defn- resolve-ns-var! [ns-sym var-sym]
+  (try (require ns-sym :reload)
+       (catch FileNotFoundException e
+         (throw (IllegalArgumentException.
+                 (format "Unable to load ns: %s/%s" ns-sym var-sym)))))
+  (or (ns-resolve ns-sym var-sym)
+      (throw (IllegalArgumentException.
+              (format "Unable to load var: %s/%s" ns-sym var-sym)))))
+
+(defn resolve-var! [sym]
+  (apply resolve-ns-var! (parse-ns-var! sym)))
