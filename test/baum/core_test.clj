@@ -89,6 +89,7 @@
   (fact "files"
     (rs "#baum/files [\"src\" \"clj$\"]")
     => [(io/file "src/baum/core.clj")
+        (io/file "src/baum/resolver.clj")
         (io/file "src/baum/util.clj")])
 
   (fact "files + filter"
@@ -143,6 +144,10 @@
     (provided
       (slurp "child.edn")  => "{:a {:a :b} :c :d}"
       (slurp "child2.edn") => "{:a {:a :b2}}"))
+
+  (fact "import with a relative path"
+    (rs "#baum/import \"dev-resources/fixtures/parent.edn\"") => {:parent {:foo {:bar "bar"}}}
+    (rs "#baum/import #baum/resource \"fixtures/parent.edn\"") => {:parent {:foo {:bar "bar"}}})
 
   (fact "Throws an exception when trying to import non-existent files"
     (rs "{:parent #baum/import \"child.edn\"}") => (throws java.io.FileNotFoundException))

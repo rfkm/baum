@@ -1,5 +1,4 @@
 (ns baum.util
-  (:require [me.raynes.fs :as fs])
   (:import java.io.FileNotFoundException))
 
 (defn deep-merge
@@ -28,11 +27,6 @@
 
 (defn alias-keys [map aliases]
   (reduce alias-key map aliases))
-
-(defn expand-home [path]
-  (if (string? path)
-    (fs/expand-home path)
-    path))
 
 (defn- parse-ns-var! [ns-var]
   (if-let [ns (namespace (symbol ns-var))]

@@ -261,6 +261,38 @@
                      {:aliases    {'baum/ref '|}})
     #+end_src
 
+** Context-aware path resolver
+
+   You can refer external files from your config file by using
+   [[#baumimport][#baum/import]], [[#bauminclude][:baum/include]] or
+   [[#baumoverride][:baum/override]].
+
+   Baum resolves a specified path depending on the path of the file
+   being parsed then. A path is resolved as follows:
+
+   | parent                             | path         | result                             |
+   |------------------------------------+--------------+------------------------------------|
+   | foo/bar.edn                        | baz.edn      | PROJECT_ROOT/baz.edn               |
+   | foo/bar.edn                        | ./baz.edn    | PROJECT_ROOT/foo/baz.edn           |
+   | foo/bar.edn                        | /tmp/baz.edn | /tmp/baz.edn                       |
+   | jar:file:/foo/bar.jar!/foo/bar.edn | baz.edn      | jar:file:/foo/bar.jar!/baz.edn     |
+   | jar:file:/foo/bar.jar!/foo/bar.edn | ./baz.edn    | jar:file:/foo/bar.jar!/foo/baz.edn |
+   | jar:file:/foo/bar.jar!/foo/bar.edn | /baz.edn     | /baz.edn                           |
+   | http://example.com/foo/bar.edn     | baz.edn      | http://example.com/baz.edn         |
+   | http://example.com/foo/bar.edn     | ./baz.edn    | http://example.com/foo/baz.edn     |
+   | http://example.com/foo/bar.edn     | /baz.edn     | /baz.edn                           |
+   | nil                                | foo.edn      | foo.edn                            |
+   | nil                                | ./foo.edn    | ./foo.edn                          |
+   | nil                                | /foo.edn     | /foo.edn                           |
+
+   If you need to access local files from files in a jar or a remote
+   server, use [[#baumfile][#baum/file]]:
+
+   #+begin_src clojure
+     {:baum/include #baum/file "foo.edn"}
+   #+end_src
+
+
 ** Built-in Reader Macros
 
 *** #baum/env

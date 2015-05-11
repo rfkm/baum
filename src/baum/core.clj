@@ -1,6 +1,7 @@
 (ns baum.core
   (:refer-clojure :exclude [read-string])
-  (:require [baum.util :as u]
+  (:require [baum.resolver :as resolver]
+            [baum.util :as u]
             [clojure.core.match :as m]
             [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]
@@ -331,7 +332,8 @@
   ([file]
    (read-config file {}))
   ([file opts]
-   (read-string opts (slurp (u/expand-home file)))))
+   (resolver/with-resolved [target file]
+     (read-string opts (slurp target)))))
 
 (defn safe-read-config
   "Same as `read-config`, but returns alt when an error occured."
