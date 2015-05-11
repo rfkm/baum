@@ -281,8 +281,8 @@
    | http://example.com/foo/bar.edn     | baz.edn      | http://example.com/baz.edn         |
    | http://example.com/foo/bar.edn     | ./baz.edn    | http://example.com/foo/baz.edn     |
    | http://example.com/foo/bar.edn     | /baz.edn     | /baz.edn                           |
-   | nil                                | foo.edn      | foo.edn                            |
-   | nil                                | ./foo.edn    | ./foo.edn                          |
+   | nil                                | foo.edn      | PROJECT_ROOT/foo.edn               |
+   | nil                                | ./foo.edn    | PROJECT_ROOT/foo.edn               |
    | nil                                | /foo.edn     | /foo.edn                           |
 
    If you need to access local files from files in a jar or a remote
