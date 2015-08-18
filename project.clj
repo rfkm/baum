@@ -12,15 +12,16 @@
                                      :creds :gpg}]]
   :dependencies [[environ "1.0.0"]
                  [me.raynes/fs "1.4.6"]
-                 [org.clojure/clojure "1.6.0"]
+                 [org.clojure/clojure "1.7.0"]
                  [org.clojure/core.match "0.3.0-alpha4"]
-                 [org.clojure/tools.reader "0.8.16"]]
-  :profiles {:dev    {:dependencies [[midje "1.6.3"]]
+                 [org.clojure/tools.reader "0.9.2"]]
+  :profiles {:dev    {:dependencies [[midje "1.7.0"]]
                       :plugins      [[lein-midje "3.1.3"]
                                      [lein-environ "1.0.0"]]
                       :env          {:env "dev"}}
              :1.5    {:dependencies [[org.clojure/clojure "1.5.1"]]}
              :1.6    {:dependencies [[org.clojure/clojure "1.6.0"]]}
-             :1.7    {:dependencies [[org.clojure/clojure "1.7.0-alpha5"]]}
-             :master {:dependencies [[org.clojure/clojure "1.7.0-master-SNAPSHOT"]]}}
+             :1.7    {:dependencies [[org.clojure/clojure "1.7.0"]]}
+             :1.8    {:dependencies [[org.clojure/clojure "1.8.0-alpha3"]]}
+             :master {:dependencies [[org.clojure/clojure "1.8.0-master-SNAPSHOT"]]}}
   :aliases {"all" ["with-profile" "+1.5:+1.6:+1.7:+master"]})
