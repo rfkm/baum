@@ -1,4 +1,4 @@
-(defproject rkworks/baum "0.2.1-SNAPSHOT"
+(defproject rkworks/baum "0.3.0-SNAPSHOT"
   :description "Extensible EDSL in EDN for building self-contained configuration files"
   :url "https://github.com/rkworks/baum"
   :license {:name "Eclipse Public License"
@@ -24,4 +24,4 @@
              :1.7    {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :1.8    {:dependencies [[org.clojure/clojure "1.8.0-alpha3"]]}
              :master {:dependencies [[org.clojure/clojure "1.8.0-master-SNAPSHOT"]]}}
-  :aliases {"all" ["with-profile" "+1.5:+1.6:+1.7:+master"]})
+  :aliases {"all" ["with-profile" "+1.5:+1.6:+1.7:+1.8:+master"]})
