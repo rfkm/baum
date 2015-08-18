@@ -337,8 +337,19 @@
       #baum/read-env []                             ; => nil
     #+end_src
 
-    *NB!* The Baum reader does NOT parse Fallback values. It parses
+    *NB!* The Baum reader does NOT parse fallback values. It parses
     only values from environment variables.
+
+*** #baum/read
+
+    Parse given string as Baum-formatted data:
+
+    #+begin_src clojure
+      #baum/read "100"                        ; => 100
+      #baum/read "foo"                        ; => 'foo
+      #baum/read "\"foo\""                    ; => "foo"
+      #baum/read "{:foo #baum/env :user}"     ; => {:foo "rkworks"}
+    #+end_src
 
 *** #baum/if
 
