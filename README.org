@@ -328,7 +328,7 @@
       #baum/read-env :port                    ; 8080
     #+end_src
 
-    You can also set fallback value like a #baum/env:
+    You can also set fallback value like a =#baum/env=:
 
     #+begin_src clojure
       #baum/read-env [:non-existent-env 8080]       ; => 8080
@@ -493,7 +493,8 @@
 
 *** #baum/import*
 
-    Same as =baum/import=, but returns nil when error occurs:
+    Same as =baum/import=, but returns nil when FileNotFound error
+    occurs:
 
     #+begin_src clojure
       {:a #baum/import* "non-existent-config.edn"} ; => {:a nil}
@@ -656,7 +657,7 @@
 
 *** :baum/include*
 
-    Same as =:baum/include=, but ignores importing errors:
+    Same as =:baum/include=, but ignores FileNotFound errors:
 
     #+begin_src clojure
       ;; child.edn
@@ -689,8 +690,8 @@
 
 *** :baum/override*
 
-    Same as =:baum/override=, but ignores importing errors. See also
-    =:baum/include*=.
+    Same as =:baum/override=, but ignores FileNotFound errors. See
+    also =:baum/include*=.
 
 *** :baum/let
 
