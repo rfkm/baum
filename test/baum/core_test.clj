@@ -126,6 +126,17 @@
   (fact "regex"
     (rs "#baum/regex \"^foo*$\" ") => #"^foo*$")
 
+  (fact "read"
+    (rs "#baum/read \"100\" ") => 100
+    (rs "#baum/read \"{:a \\\"b\\\"}\" ") => {:a "b"}
+    (rs "#baum/read \"#baum/read \\\"100\\\"\" ") => 100)
+
+  (fact "read-env"
+    (rs "#baum/read-env :port") => 100
+    (rs "#baum/read-env [:port2 100]") => 100
+    (background
+     (env :port) => "100"
+     (env :port2) => nil))
 
   (fact "import"
     (rs "{:parent #baum/import \"child.edn\"}") => {:parent {:a :b}}

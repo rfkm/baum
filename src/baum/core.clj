@@ -121,6 +121,16 @@
 (defreader import-reader* [v opts]
   (import-config* v opts))
 
+(declare read-string)
+
+(defreader read-reader [v opts]
+  (read-string opts v))
+
+(defreader read-env-reader [v opts]
+  (let [vs (if-not (vector? v) [v nil] v)] ; Add nil as fallback
+    (or (read-string (some env (butlast vs)))
+        (last vs))))
+
 
 ;;;
 ;;; Reduction
@@ -246,6 +256,8 @@
    'baum/resource resource-reader
    'baum/file     file-reader
    'baum/files    files-reader
+   'baum/read     read-reader
+   'baum/read-env read-env-reader
    'baum/import   import-reader
    'baum/import*  import-reader*
    'baum/some     some-reader
@@ -272,6 +284,8 @@
    'baum/resource  'resource
    'baum/file      'file
    'baum/files     'files
+   'baum/read      'read
+   'baum/read-env  'read-env
    'baum/import    'import
    'baum/import*   'import*
    'baum/some      'some

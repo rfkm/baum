@@ -240,6 +240,8 @@
        'baum/resource  'resource
        'baum/file      'file
        'baum/files     'files
+       'baum/read      'read
+       'baum/read-env  'read-env
        'baum/import    'import
        'baum/import*   'import*
        'baum/some      'some
@@ -315,10 +317,28 @@
       #baum/env [:non-existent-env :user "not-found"] ; => "rkworks"
       #baum/env ["foo"]                               ; => "foo"
       #baum/env []                                    ; => nil
-
-      ;; real-world example
-      {:port #baum/env [:port 3000]}
     #+end_src
+
+*** #baum/read-env
+
+    Read environment variables and parse it as Baum-formatted data:
+
+    #+begin_src clojure
+      #baum/env      :port                    ; "8080"
+      #baum/read-env :port                    ; 8080
+    #+end_src
+
+    You can also set fallback value like a #baum/env:
+
+    #+begin_src clojure
+      #baum/read-env [:non-existent-env 8080]       ; => 8080
+      #baum/read-env [:non-existent-env :port 8080] ; => 3000
+      #baum/read-env ["foo"]                        ; => "foo"
+      #baum/read-env []                             ; => nil
+    #+end_src
+
+    *NB!* The Baum reader does NOT parse Fallback values. It parses
+    only values from environment variables.
 
 *** #baum/if
 
