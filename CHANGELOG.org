@@ -1,5 +1,17 @@
 * Changelog
 
+** 0.3.0 / 2015-08-18
+
+   - `safe-read-config` now ignores only =FileNotFoundException=
+     - The previous design is very error-prone because any exception
+       is implicitly ignored even if it is a parsing error. It is very
+       hard for users to figure out why corrupted files are parsed as
+       nil.
+     - This change affects =#baum/import*=, =:baum/include*= and
+       =:baum/override*=.
+   - Added =#baum/read=
+   - Added =#baum/read-env=
+
 ** 0.2.0 / 2015-05-11
 
    - Added context-aware path resolver
