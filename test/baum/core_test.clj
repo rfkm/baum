@@ -152,8 +152,11 @@
   (fact "Throws an exception when trying to import non-existent files"
     (rs "{:parent #baum/import \"child.edn\"}") => (throws java.io.FileNotFoundException))
 
-  (fact "Returns an empty map when trying to import* non-existent files"
+  (fact "Returns nil when trying to import* non-existent files"
     (rs "{:parent #baum/import* \"child.edn\"}") => {:parent nil})
+
+  (fact "Throws an exception when trying to import* corrupted files"
+    (rs "{:parent #baum/import* \"dev-resources/fixtures/corrupted.edn\"}") => (throws clojure.lang.ExceptionInfo))
 
   (fact "inspect"
     (let [res "\n{:baum/include {:a :b}, :a :c}\n\n↓ ↓ ↓\n\n{:a :c}\n\n"]
@@ -259,9 +262,8 @@
         (slurp "child.edn")  => "{:a :a :b :b :c :c}"
         (slurp "child2.edn") => "{:a :a2 :b :b2}"))
 
-    (fact "just ignore invalid value to include*"
-      (f {:baum/include* "invalid-path"}) => {}
-      (f {:baum/include* 100}) => {})
+    (fact "just ignore invalid path to include*"
+      (f {:baum/include* "invalid-path"}) => {})
 
     (fact "override"
       (f {:baum/override {:a 100
@@ -333,9 +335,9 @@
         (slurp "child.edn")  => "{:a :a :b :b}"
         (slurp "child2.edn") => "{:a :a2 :b :b2}"))
 
-    (fact "Returns an empty map when given value to override is invalid"
+    (fact "Returns an empty map when given path is invalid"
       (f {:baum/override* "invalid-path"}) => {}
-      (f {:baum/override* 100
+      (f {:baum/override* "invalid-path"
           :a :b}) => {:a :b})
 
     (fact "custom special key"

@@ -336,11 +336,11 @@
      (read-string opts (slurp target)))))
 
 (defn safe-read-config
-  "Same as `read-config`, but returns alt when an error occured."
+  "Same as `read-config`, but returns alt when file doesn't exist."
   {:arglists
    '([file alt] [file opts alt])}
   [& args]
   (try
     (apply read-config (butlast args))
-    (catch Exception e
+    (catch java.io.FileNotFoundException e
       (last args))))
