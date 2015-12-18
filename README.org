@@ -1,6 +1,6 @@
 * Baum
 
-  [[https://circleci.com/gh/rkworks/baum][https://circleci.com/gh/rkworks/baum.svg?style=svg]]
+  [[https://circleci.com/gh/rfkm/baum][https://circleci.com/gh/rfkm/baum.svg?style=svg]]
 
   *Baum* is an extensible EDSL in EDN for building self-contained
   configuration files.

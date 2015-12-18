@@ -1,6 +1,6 @@
 (defproject rkworks/baum "0.3.1-SNAPSHOT"
   :description "Extensible EDSL in EDN for building self-contained configuration files"
-  :url "https://github.com/rkworks/baum"
+  :url "https://github.com/rfkm/baum"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
