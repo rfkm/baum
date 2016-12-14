@@ -1,5 +1,12 @@
 * Changelog
 
+** unreleased
+
+   - Update dependencies
+   - Change the default alias of =#baum/eval= reader from =#== to =#eval=
+     - This fixes a bug where it is not possible to use the eval-reader with
+       other baum's readers/reducers.
+
 ** 0.3.0 / 2015-08-18
 
    - `safe-read-config` now ignores only =FileNotFoundException=
