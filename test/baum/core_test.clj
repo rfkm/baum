@@ -409,7 +409,14 @@
 
   (fact "Cannot access variables defined in inner scopes"
     (rs "{:a #baum/ref a
-          :b {:baum/let [a 100]}}") => (throws "Unable to resolve symbol: a in this context")))
+          :b {:baum/let [a 100]}}") => (throws "Unable to resolve symbol: a in this context"))
+
+  (fact "Can use a bound value via let with eval"
+    (rs "{$let [v \"foo\"]
+                 :foo #if [#- v
+                           #eval (str \"*\" #- v  \"*\")
+                           \"nothing\"]}")
+    => {:foo "*foo*"}))
 
 (facts "aliasiing"
   (fact "custom"

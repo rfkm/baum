@@ -290,7 +290,7 @@
    'baum/import*   'import*
    'baum/some      'some
    'baum/resolve   'resolve
-   'baum/eval      '=
+   'baum/eval      'eval
    'baum/ref       '-
    'baum/inspect   'inspect
    :baum/let       '$let
