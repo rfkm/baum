@@ -10,14 +10,14 @@
                                       :password [:gpg :env]}]
                         ["releases" {:url   "https://clojars.org/repo/"
                                      :creds :gpg}]]
-  :dependencies [[environ "1.0.2"]
+  :dependencies [[environ "1.1.0"]
                  [me.raynes/fs "1.4.6"]
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [org.clojure/tools.reader "1.0.0-alpha2"]]
   :profiles {:dev    {:dependencies [[org.clojure/clojure "1.8.0"]
                                      [midje "1.8.3"]]
-                      :plugins      [[lein-midje "3.2"]
-                                     [lein-environ "1.0.2"]]
+                      :plugins      [[lein-midje "3.2.1"]
+                                     [lein-environ "1.1.0"]]
                       :env          {:env "dev"}}
              :1.5    {:dependencies [[org.clojure/clojure "1.5.1"]]}
              :1.6    {:dependencies [[org.clojure/clojure "1.6.0"]]}
