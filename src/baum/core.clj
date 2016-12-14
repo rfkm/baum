@@ -167,21 +167,11 @@
                                h))))
                   opts))
 
-(defn reduction
-  [m opts]
-  (let [reducers (:reducers opts)
-        new-m    (apply-lazy-reducer reducers m opts)]
-
-    ;; XXX: Lexical scope is better? There is no function call in the
-    ;;      static config file world (except for `eval`), so there may
-    ;;      be no difference between lexical scope and dynamic scope
-    ;;      in almost all cases. However, it may be a problem that
-    ;;      scopes are visible from other imported files.
-    (binding [*context* (merge *context*
-                               (::context (meta new-m) {}))]
-      (w/walk #(reduction % opts)
-              #(apply-eager-reducer reducers % opts)
-              new-m))))
+(defn reduction [m opts]
+  (let [reducers (:reducers opts)]
+    (w/walk #(reduction % opts)
+            #(apply-eager-reducer reducers % opts)
+            (apply-lazy-reducer reducers m opts))))
 
 
 ;;;
@@ -220,8 +210,14 @@
         (->> (apply hash-map)))))
 
 (defn- reduce-let [m v opts]
-  (with-meta m {::context (create-context v opts)}))
-
+  ;; XXX: Lexical scope is better? There is no function call in the
+  ;;      static config file world (except for `eval`), so there may
+  ;;      be no difference between lexical scope and dynamic scope
+  ;;      in almost all cases. However, it may be a problem that
+  ;;      scopes are visible from other imported files.
+  (binding [*context* (merge *context*
+                             (create-context v opts))]
+    (reduction m opts)))
 
 ;;;
 ;;; Global Variables
