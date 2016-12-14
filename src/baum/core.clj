@@ -96,7 +96,7 @@
     (*context* v)
     (refer-global-variable v)))
 
-(declare read-config safe-read-config)
+(declare read-file safe-read-file)
 
 (defn- import-multiple [v importer]
   (->> v
@@ -105,21 +105,21 @@
        (remove nil?)
        (reduce u/deep-merge)))
 
-(defn- import-config [v opts]
+(defn- import-file [v opts]
   (import-multiple v #(if ((some-fn map? nil?) %)
                         %
-                        (read-config % opts))))
+                        (read-file % opts))))
 
-(defn- import-config* [v opts]
+(defn- import-file* [v opts]
   (import-multiple v #(if ((some-fn map? nil?) %)
                         %
-                        (safe-read-config % opts nil))))
+                        (safe-read-file % opts nil))))
 
 (defreader import-reader [v opts]
-  (import-config v opts))
+  (import-file v opts))
 
 (defreader import-reader* [v opts]
-  (import-config* v opts))
+  (import-file* v opts))
 
 (declare read-string)
 
@@ -182,16 +182,16 @@
   (f v opts))
 
 (defn- reduce-include [m v opts]
-  (import-config (conj (u/vectorize v) m) opts))
+  (import-file (conj (u/vectorize v) m) opts))
 
 (defn- reduce-include* [m v opts]
-  (import-config* (conj (u/vectorize v) m) opts))
+  (import-file* (conj (u/vectorize v) m) opts))
 
 (defn- reduce-override [m v opts]
-  (import-config (into [m] (u/vectorize v)) opts))
+  (import-file (into [m] (u/vectorize v)) opts))
 
 (defn- reduce-override* [m v opts]
-  (import-config* (into [m] (u/vectorize v)) opts))
+  (import-file* (into [m] (u/vectorize v)) opts))
 
 (defn- reduce-bindings [bindings opts]
   (reduce (fn [acc [k v]]
@@ -211,7 +211,7 @@
 
 (defn- reduce-let [m v opts]
   ;; XXX: Lexical scope is better? There is no function call in the
-  ;;      static config file world (except for `eval`), so there may
+  ;;      static file world (except for `eval`), so there may
   ;;      be no difference between lexical scope and dynamic scope
   ;;      in almost all cases. However, it may be a problem that
   ;;      scopes are visible from other imported files.
@@ -329,6 +329,15 @@
 ;;;
 
 (defn read-string
+  "Read the given string as a Baum-formatted string. The acceptable options are
+  the following:
+
+  :readers - A map of readers. See `default-readers`.
+  :reducers - A map of reducers. See `default-reducers`.
+  :aliases - A map of aliases. See `default-aliases`.
+  :shorthand? - Whether to enable the shorthand notation. In other words,
+  whether to enable the default alias settings.
+  :edn? - Whether to enable the EDN-only reader."
   ([s]
    (read-string {:eof nil} s))
   ([opts s]
@@ -338,19 +347,42 @@
        (binding [r/*data-readers* (merge r/*data-readers* (opts :readers))]
          (apply-transformers (r/read-string s) opts))))))
 
-(defn read-config
+(defn read-file
+  "Read a Baum-formatted file. See `read-string` for the list of available
+  options."
   ([file]
-   (read-config file {}))
+   (read-file file {}))
   ([file opts]
    (resolver/with-resolved [target file]
      (read-string opts (slurp target)))))
 
-(defn safe-read-config
-  "Same as `read-config`, but returns alt when file doesn't exist."
+(defn safe-read-file
+  "Same as `read-file`, but returns alt when file doesn't exist."
   {:arglists
    '([file alt] [file opts alt])}
   [& args]
   (try
-    (apply read-config (butlast args))
+    (apply read-file (butlast args))
     (catch java.io.FileNotFoundException e
       (last args))))
+
+(defn read-config
+  "DEPRECATED: Use 'read-file' instead.
+  Read a Baum-formatted file. See `read-string` for the list of available
+  options."
+  {:deprecated "0.4.0"
+   :arglists
+   '([file] [file opts])}
+  [& args]
+  (println "Warning: read-config is deprecated; use read-file")
+  (apply read-file args))
+
+(defn safe-read-config
+  "DEPRECATED: Use 'safe-read-file' instead.
+  Same as `read-config`, but returns alt when file doesn't exist."
+  {:deprecated "0.4.0"
+   :arglists
+   '([file alt] [file opts alt])}
+  [& args]
+  (println "Warning: safe-read-config is deprecated; use safe-read-file")
+  (apply safe-read-file args))

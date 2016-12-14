@@ -34,13 +34,13 @@
 
 ** Reading your config file
 
-   To read your config files, use =read-config=:
+   To read your config files, use =read-file=:
 
    #+begin_src clojure
      (ns your-ns
        (:require [baum.core :as b]))
 
-     (def config (b/read-config "path/to/config.edn")) ; a map
+     (def config (b/read-file "path/to/config.edn")) ; a map
 
      (:foo config)
      (get-in config [:foo :bar])
@@ -53,10 +53,10 @@
        (:require [baum.core :as b]
                  [clojure.java.io :as io]))
 
-     (def config (b/read-config (io/resource "config.edn")))
+     (def config (b/read-file (io/resource "config.edn")))
 
      (def config2
-       (b/read-config (java.io.StringReader. "{:a :b}"))) ; Same as (b/read-string "{:a :b}")
+       (b/read-file (java.io.StringReader. "{:a :b}"))) ; Same as (b/read-string "{:a :b}")
    #+end_src
 
    See =clojure.java.io/reader= for a complete list of supported
@@ -70,8 +70,8 @@
      (ns your-ns
        (:require [baum.core :as b]))
 
-     (def config (b/read-config "path/to/config.edn"
-                                {:edn? true}))
+     (def config (b/read-file "path/to/config.edn"
+                              {:edn? true}))
    #+end_src
 
    Even if you use the EDN-only reader, some features of Baum may
@@ -86,8 +86,8 @@
                  [clojure.tools.reader :as r]))
 
      (def config (binding [r/*read-eval* false]
-                   (b/read-config "path/to/config.edn"
-                                  {:edn? true})))
+                   (b/read-file "path/to/config.edn"
+                                {:edn? true})))
    #+end_src
 
 ** Examples
@@ -134,7 +134,7 @@
         (:require [baum.core :as b]
                   [clojure.java.io :as io]))
 
-      (def config (b/read-config (io/resource "config.edn")))
+      (def config (b/read-file (io/resource "config.edn")))
     #+end_src
 
     config.edn:
@@ -192,10 +192,10 @@
    aliases for them:
 
    #+begin_src clojure
-     (read-config "path/to/config.edn"
-                  {:aliases {'baum/env 'env
-                             :baum/let '$let
-                             'baum/ref '-}})
+     (read-file "path/to/config.edn"
+                {:aliases {'baum/env 'env
+                           :baum/let '$let
+                           'baum/ref '-}})
    #+end_src
 
    Then you can rewrite your configuration as follows:
@@ -223,8 +223,8 @@
     but you can disable it if necessary:
 
     #+begin_src clojure
-      (b/read-config "path/to/config.edn"
-                     {:shorthand? false})
+      (b/read-file "path/to/config.edn"
+                   {:shorthand? false})
     #+end_src
 
     And its content is as follows:
@@ -257,8 +257,8 @@
     Of course, it is possible to overwrite some of them:
 
     #+begin_src clojure
-      (b/read-config "path/to/config.edn"
-                     {:aliases    {'baum/ref '|}})
+      (b/read-file "path/to/config.edn"
+                   {:aliases {'baum/ref '|}})
     #+end_src
 
 ** Context-aware path resolver
@@ -621,7 +621,7 @@
 
       ;;; your_ns.clj
 
-      (b/read-config "config.edn")
+      (b/read-file "config.edn")
       ;; This returns {:bar :baz, :foo {:a :foo, :b :bar, :c :d}}
       ;; and prints:
       ;;
@@ -811,13 +811,13 @@
        (str "Hello, " v "!"))
 
      ;; Put your reader macro in reader options:
-     (b/read-config "config.edn"
-                    {:readers {'greet greeting-reader}}) ; => {:foo "Hello, World!"}
+     (b/read-file "config.edn"
+                  {:readers {'greet greeting-reader}}) ; => {:foo "Hello, World!"}
 
      ;; Another way to enable your macro:
      (binding [*data-readers* (merge *data-readers*
                                      {'greet greeting-reader})]
-       (b/read-config "config.edn"))
+       (b/read-file "config.edn"))
    #+end_src
 
    For more complex examples, see implementations of built-in
@@ -881,8 +881,8 @@
        (select-keys m v))
 
      ;; Put your reducer in reader options:
-     (b/read-config "config.edn"
-                    {:reducers {:your-ns/narrow narrow}})
+     (b/read-file "config.edn"
+                  {:reducers {:your-ns/narrow narrow}})
    #+end_src
 
    In the above example, =v= is a value under the =:your-ns/narrow=
@@ -908,8 +908,8 @@
       :d :qux}
 
      ;;; your_ns.clj
-     (b/read-config "config.edn"
-                    {:reducers {'narrow narrow}})
+     (b/read-file "config.edn"
+                  {:reducers {'narrow narrow}})
    #+end_src
 
 ** License

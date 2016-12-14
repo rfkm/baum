@@ -27,16 +27,16 @@
   (let [test-conf-path "dev-resources/test.edn"
         ret {:foo :bar}]
     (fact "from a string path"
-      (c/read-config test-conf-path) => ret)
+      (c/read-file test-conf-path) => ret)
 
     (fact "from a file object"
-      (c/read-config (io/file test-conf-path)) => ret)
+      (c/read-file (io/file test-conf-path)) => ret)
 
     (fact "from a url object"
-      (c/read-config (io/as-url (io/file test-conf-path))) => ret)))
+      (c/read-file (io/as-url (io/file test-conf-path))) => ret)))
 
 
-(facts "can read config files with reader macros"
+(facts "can read files with reader macros"
   (fact "inst"
     (rs "{:a #inst \"1989-10-29\"}") => {:a #inst "1989-10-29"})
 
@@ -213,7 +213,7 @@
     => {:a nil}))
 
 
-(facts "can read config files with special keys"
+(facts "can read files with special keys"
   (let [f #(@#'c/reduction % {:reducers (@#'c/default-reducers)})]
     (fact "include - map"
       (f {:baum/include {:a 100
@@ -519,6 +519,6 @@
 
 
 #_(facts "Integration"
-    (doseq [[in out] (c/read-config (io/resource "whole.edn") {:shorthand? true})]
+    (doseq [[in out] (c/read-file (io/resource "whole.edn") {:shorthand? true})]
       (fact
         in => out)))

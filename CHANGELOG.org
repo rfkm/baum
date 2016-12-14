@@ -5,7 +5,10 @@
    - Update dependencies
    - Change the default alias of =#baum/eval= reader from =#== to =#eval=
      - This fixes a bug where it is not possible to use the eval-reader with
-       other baum's readers/reducers.
+       other Baum's readers/reducers.
+   - =read-config=, =safe-read-config= is now deprecated. Use =read-file=,
+     =safe-read-file= instead. The objective of this change is to emphasize Baum
+     can be used any other purpose.
 
 ** 0.3.0 / 2015-08-18
 
