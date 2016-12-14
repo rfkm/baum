@@ -2,15 +2,13 @@
 
   [[https://circleci.com/gh/rfkm/baum][https://circleci.com/gh/rfkm/baum.svg?style=svg]]
 
-  *Baum* is an extensible EDSL in EDN for building self-contained
-  configuration files.
+  *Baum* is an extensible EDSL in EDN for building rich configuration files.
 
   It is built on top of
   [[https://github.com/clojure/tools.reader][clojure.tools.reader]]
-  and offers following features.
+  and offers the following features.
 
-  - Providing a basic mechanism for building simple and extensible DSL
-    in EDN
+  - Basic mechanism for building simple and extensible DSL in EDN
     - Reader macros
     - Post-parsing reductions
       - A transformation of a map which has a special key to trigger it
@@ -76,8 +74,8 @@
                                 {:edn? true}))
    #+end_src
 
-   Even though you use the EDN-only reader, some features of Baum may
-   spoil its safety. So you should still load only trusted resources.
+   Even if you use the EDN-only reader, some features of Baum may
+   compromise its safety. So you should only load trusted resources.
 
    In addition, to disable =#baum/eval=, set
    =clojure.tools.reader/*read-eval*= to false:
@@ -190,8 +188,8 @@
 
 ** Aliasing
 
-   If built-in reader macros or special keys are verbose for you, you
-   can define aliases for them:
+   If the built-in reader macros or special keys are verbose, you can define
+   aliases for them:
 
    #+begin_src clojure
      (read-config "path/to/config.edn"
@@ -220,9 +218,9 @@
 
 *** Built-in shorthand notation
 
-    You can use built-in opinionated aliases if it is not necessary to
-    worry about the conflict for you. The shorthand notation is
-    enabled by default, but you can disable it if you need:
+    You can use built-in opinionated aliases if it is not necessary to worry
+    about the conflict for you. The shorthand notation is enabled by default,
+    but you can disable it if necessary:
 
     #+begin_src clojure
       (b/read-config "path/to/config.edn"
@@ -265,12 +263,11 @@
 
 ** Context-aware path resolver
 
-   You can refer external files from your config file by using
-   [[#baumimport][#baum/import]], [[#bauminclude][:baum/include]] or
-   [[#baumoverride][:baum/override]].
+   You can refer to external files from your config file by using [[#baumimport][#baum/import]],
+   [[#bauminclude][:baum/include]] or [[#baumoverride][:baum/override]].
 
-   Baum resolves a specified path depending on the path of the file
-   being parsed then. A path is resolved as follows:
+   Baum resolves specified paths depending on the path of the file being parsed.
+   Paths are resolved as follows:
 
    | parent                             | path         | result                             |
    |------------------------------------+--------------+------------------------------------|
@@ -310,7 +307,7 @@
     file, or your =project.clj= (you need =lein-env= plugin). For
     more details, see Environ's README.
 
-    You can also set fallback value:
+    You can also set fallback values:
 
     #+begin_src clojure
       #baum/env [:non-existent-env "not-found"]       ; => "not-found"
@@ -328,7 +325,7 @@
       #baum/read-env :port                    ; 8080
     #+end_src
 
-    You can also set fallback value like a =#baum/env=:
+    You can also set a fallback value like a =#baum/env=:
 
     #+begin_src clojure
       #baum/read-env [:non-existent-env 8080]       ; => 8080
@@ -342,7 +339,7 @@
 
 *** #baum/read
 
-    Parse given string as Baum-formatted data:
+    Parse given strings as Baum-formatted data:
 
     #+begin_src clojure
       #baum/read "100"                        ; => 100
@@ -417,7 +414,7 @@
                    :else             :unknown]
     #+end_src
 
-    For more details, see the documentations of
+    For more details, see the documentation at
     [[https://github.com/clojure/core.match][core.match]].
 
 *** #baum/file
@@ -431,7 +428,7 @@
 
 *** #baum/resource
 
-    Your can also refer resouce files via =baum/resource=:
+    Your can also refer to resource files via =baum/resource=:
 
     #+begin_src clojure
       {:resource #baum/resource "config.edn"}
@@ -440,7 +437,7 @@
 
 *** #baum/files
 
-    You can obtain a list of all files in a direcotry by using
+    You can obtain a list of all the files in a directory by using
     =baum/files=:
 
     #+begin_src clojure
@@ -448,7 +445,7 @@
       ;; => [#<File src/baum/core.clj> #<File src/baum/util.clj>]
     #+end_src
 
-    You can also filter the list if you need to:
+    You can also filter the list if required:
 
     #+begin_src clojure
       #baum/files ["." "\\.clj$"]
@@ -468,7 +465,7 @@
     #+end_src
 
     It is useful only when you use the EDN reader because EDN does not
-    support regex literal.
+    support regex literals.
 
 *** #baum/import
 
@@ -487,20 +484,20 @@
       ;; => {:parent-key {:child-key :child-val}}
     #+end_src
 
-    If you want to import a resouce file, use =baum/resource= together:
+    If you want to import a resource file, use =baum/resource= together:
 
     #+begin_src clojure
       {:a #baum/import #baum/resource "config.edn"}
     #+end_src
 
-    The following example shows how to import all files under certain
+    The following example shows how to import all the files in a specified
     directory:
 
     #+begin_src clojure
       #baum/import #baum/files ["config" "\\.edn$"]
     #+end_src
 
-    *NB:* The reader throws an exception if you try to import a non existent file.
+    *NB:* The reader throws an exception if you try to import a non-existent file.
 
 *** #baum/import*
 
@@ -542,7 +539,7 @@
 
 *** #baum/resolve
 
-    =baum/resolve= resolves a given symbol and resturns a var:
+    =baum/resolve= resolves a given symbol and returns a var:
 
     #+begin_src clojure
       {:handler #baum/resolve my-ns.routes/main-route} ; => {:handler #'my-ns.routes/main-route}
@@ -560,12 +557,34 @@
     When =clojure.tools.reader/*read-eval*= is false, =#baum/eval= is
     disabled.
 
+
+    *NB:* While you can use =#== to eval clojure expressions as far as
+    =clojure.tools.reader/*read-eval*= is true, you should still use Baum's
+    implementation, that is =#baum/eval=, because the official implementation
+    doesn't take account into using it with other Baum's reducers/readers. For
+    example, the following code that uses =baum/let= doesn't work:
+
+    #+begin_src clojure
+      ;; NG
+      {$let [v "foo"]
+       :foo #=(str "*" #- v "*")} ; => error!
+    #+end_src
+
+    You can avoid the error using Baum's implementation instead:
+
+    #+begin_src clojure
+      ;; OK
+      {$let [v "foo"]
+       :foo #baum/eval (str "*" #- v "*")} ; => {:foo "*foo*"}
+    #+end_src
+
+
 *** #baum/ref
 
-    You can refer bound variables with =baum/ref=. For more details,
-    see the explanation of [[#baumlet][:baum/let]].
+    You can refer to bound variables with =baum/ref=. For more details,
+    see the explanation found at [[#baumlet][:baum/let]].
 
-    You can also refer global variables:
+    You can also refer to global variables:
 
     #+begin_src clojure
       {:hostname #baum/ref HOSTNAME}          ; => {:hostname "foobar.local"}
@@ -658,7 +677,7 @@
        :b :parent}                            ; => {:a :child :b :parent}
     #+end_src
 
-    Of course it is possible to pass a vector of importable values:
+    Of course, it is possible to pass a vector of importable values:
 
     #+begin_src clojure
       {:baum/include ["child.edn"
@@ -852,7 +871,7 @@
       :c :baz}
    #+end_src
 
-   To implement this, you could write as follows:
+   To implement this, you could write the following:
 
    #+begin_src clojure
      (ns your-ns
@@ -877,8 +896,8 @@
              {...})
    #+end_src
 
-   By the way, the trigger key does not have to be a keyword. Therefore, you
-   can write, for example, it as follows:
+   By the way, the trigger key does not have to be a keyword. Therefore, you can
+   write, for example, the following:
 
    #+begin_src clojure
      ;;; config.edn
@@ -895,6 +914,6 @@
 
 ** License
 
-   Copyright © 2015 Ryo Fukumuro
+   Copyright © 2016 Ryo Fukumuro
 
    Distributed under the Eclipse Public License, the same as Clojure.
