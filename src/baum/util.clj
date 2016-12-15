@@ -7,9 +7,6 @@
     (apply merge-with deep-merge vals)
     (last vals)))
 
-(defn fmap [f m]
-  (into {} (for [[k v] m] [k (f v)])))
-
 (defn map-every-nth [f n coll]
   (map-indexed (fn [i v]
                  (if (zero? (mod (inc i) n))
