@@ -87,10 +87,10 @@
     => {:a (io/file "dev-resources/test.edn")})
 
   (fact "files"
-    (rs "#baum/files [\"src\" \"clj$\"]")
-    => [(io/file "src/baum/core.clj")
-        (io/file "src/baum/resolver.clj")
-        (io/file "src/baum/util.clj")])
+    (rs "#baum/files [\"dev-resources/fixtures/files\" \"clj$\"]")
+    => [(io/file "dev-resources/fixtures/files/a.clj")
+        (io/file "dev-resources/fixtures/files/b.clj")
+        (io/file "dev-resources/fixtures/files/d.clj")])
 
   (fact "files + filter"
     (rs "#baum/files [\"src\" \"core.*clj$\"]")
