@@ -2,8 +2,8 @@
   (:require [clojure.set :as set]
             [baum.util :as u]))
 
-;; Borrowed the idea that controlling the merging strategy based on metadata
-;; from Leiningen
+;; Borrowed the idea of controlling the merging strategy based on metadata from
+;; Leiningen
 
 (def ^:private +priority-exactly+ 2)
 (def ^:private +priority-any+ 1)
@@ -86,10 +86,10 @@
     (not= :default matcher)
     false))
 
-;; Using multimethods to implement the merging strategies might be not good
+;; Using multimethods to implement the merging strategies might be the not good
 ;; idea since that makes it harder to control the priority of rules. While I
 ;; would like to keep this for the better customizability, I might rethink in
-;; the feature.
+;; the future.
 (defmulti prioritized-merge (partial dispatch-matcher #'prioritized-merge))
 
 (defmulti merge-colls (partial dispatch-matcher #'merge-colls))
