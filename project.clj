@@ -1,4 +1,4 @@
-(defproject rkworks/baum "0.4.0"
+(defproject rkworks/baum "0.4.1-SNAPSHOT"
   :description "Extensible EDSL in EDN for building self-contained configuration files"
   :url "https://github.com/rfkm/baum"
   :license {:name "Eclipse Public License"
