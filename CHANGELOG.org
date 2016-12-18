@@ -9,6 +9,9 @@
    - =read-config=, =safe-read-config= is now deprecated. Use =read-file=,
      =safe-read-file= instead. The objective of this change is to emphasize Baum
      can be used any other purpose.
+   - Built-in reducers are now public
+   - Make the merging strategies controllable
+   - Check if there is unexpanded reducer and expand it if it exists
 
 ** 0.3.0 / 2015-08-18
 
