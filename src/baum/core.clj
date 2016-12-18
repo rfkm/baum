@@ -181,19 +181,19 @@
 ;;; Reducers
 ;;;
 
-(defn- reduce-invoke [m [f v] opts]
+(defn reduce-invoke [m [f v] opts]
   (f v opts))
 
-(defn- reduce-include [m v opts]
+(defn reduce-include [m v opts]
   (import-file (conj (u/vectorize v) m) opts))
 
-(defn- reduce-include* [m v opts]
+(defn reduce-include* [m v opts]
   (import-file* (conj (u/vectorize v) m) opts))
 
-(defn- reduce-override [m v opts]
+(defn reduce-override [m v opts]
   (import-file (into [m] (u/vectorize v)) opts))
 
-(defn- reduce-override* [m v opts]
+(defn reduce-override* [m v opts]
   (import-file* (into [m] (u/vectorize v)) opts))
 
 (defn- reduce-bindings [bindings opts]
@@ -212,7 +212,7 @@
         (reduce-bindings opts)
         (->> (apply hash-map)))))
 
-(defn- reduce-let [m v opts]
+(defn reduce-let [m v opts]
   ;; XXX: Lexical scope is better? There is no function call in the
   ;;      static file world (except for `eval`), so there may
   ;;      be no difference between lexical scope and dynamic scope
