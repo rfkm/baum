@@ -82,7 +82,7 @@
     (some #(reduction % opts) vs)))
 
 (deflazyreader if-reader [[test then & [else]] opts]
-  (reduction (if (reduction test opts) then else) opts))
+  (if (reduction test opts) then else))
 
 (deflazyreader match-reader [[vars & clauses] opts]
   (let [protect (partial u/map-every-nth #(list 'quote %) 2)]
@@ -140,7 +140,10 @@
   (let [key-set (set (keys reducers))]
     (reduce (fn [acc-m k]
               (if-let [f (get-reducer reducers k)]
-                (f (dissoc acc-m k) (acc-m k) opts)
+                (let [reduced (f (dissoc acc-m k) (acc-m k) opts)]
+                  (if (not= reduced acc-m)
+                    (reduction reduced opts)
+                    reduced))
                 acc-m))
             m
             (or (and (map? m)
