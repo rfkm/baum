@@ -961,8 +961,8 @@
    follows:
 
    #+begin_src clojure
-     (narrow [:a :c]
-             {:a :foo :b :bar :c :baz :d :qux}
+     (narrow {:a :foo :b :bar :c :baz :d :qux}
+             [:a :c]
              {...})
    #+end_src
 
