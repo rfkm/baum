@@ -214,7 +214,7 @@
 
 
 (facts "can read files with special keys"
-  (let [f #(@#'c/reduction % {:reducers (@#'c/default-reducers)})]
+  (let [f #(c/reduction % {:reducers (c/default-reducers)})]
     (fact "include - map"
       (f {:baum/include {:a 100
                          :b 200
@@ -352,10 +352,10 @@
           :a :b}) => {:a :b})
 
     (fact "custom special key"
-      (@#'c/reduction {:foo/bar :a}
-                      {:reducers {:foo/bar (fn [m v opts]
-                                             (assoc m :foo/bar :foo))}})
-      => {:foo/bar :foo})))
+      (c/reduction {:foo/bar :a}
+                   {:reducers {:foo/bar (fn [m v opts]
+                                          (assoc m :bar :foo))}})
+      => {:bar :foo})))
 
 (facts "let+ref"
   (fact "reader macro"
