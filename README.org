@@ -291,6 +291,76 @@
      {:baum/include #baum/file "foo.edn"}
    #+end_src
 
+** Merging strategies
+
+   There are cases where multiple data are merged, such as reading an external
+   file or overwriting a part of the setting depending on the environment. Baum
+   does not simply call Clojure's merge, but deeply merges according to its own
+   strategy.
+
+*** Default merging strategy
+
+    The default merging strategy is as follows:
+
+    - Recursively merge them if both /left/ and /right/ are maps
+    - Otherwise, take /right/
+
+*** Controlling merging strategies
+
+    A mechanism to control merge strategy by metadata has been added since
+    version 0.4.0. This is inspired by Leiningen, but the fine behavior is
+    different.
+
+**** Controlling priorities
+
+     To control priorities, use =:replace=, =:displace=:
+
+    #+BEGIN_SRC clojure
+      {:a {:b :c}
+       :baum/override {:a {:d :e}}}
+      ;; => {:a {:b :c, :d :e}}
+
+      {:a {:b :c}
+       :baum/override {:a ^:replace {:d :e}}}
+      ;; => {:a {:d :e}}
+
+      {:a ^:displace {:b :c}
+       :baum/override {:a {:d :e}}}
+      ;; => {:a {:d :e}}
+    #+END_SRC
+
+
+    If you add =:replace= as metadata to /right/, /right/ will always be adopted
+    without merging them.
+    
+    If you add =:displace= to /left/, if /left/ does not exist, /left/ is
+    adopted as it is, but /right/ will always be adopted as it is if /right/
+    exists.
+    
+**** Combining collections
+
+     Unlike Leiningen, Baum only merges maps by default. In the merging of other
+     collections like vectors or sets, /right/ is always adopted. If you want to
+     combine collections, use =:append= or =:prepend=:
+
+    #+BEGIN_SRC clojure
+      {:a [1 2 3]
+       :baum/override {:a [4 5 6]}}
+      ;; => {:a [4 5 6]}
+
+      {:a [1 2 3]
+       :baum/override {:a ^:append [4 5 6]}}
+      ;; => {:a [1 2 3 4 5 6]}
+
+      {:a [1 2 3]
+       :baum/override {:a ^:prepend [4 5 6]}}
+      ;; => {:a [4 5 6 1 2 3]}
+
+      {:a #{1 2 3}
+       :baum/override {:a ^:append #{4 5 6}}}
+      ;; => {:a #{1 2 3 4 5 6}}
+    #+END_SRC
+
 
 ** Built-in Reader Macros
 

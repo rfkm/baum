@@ -1,6 +1,7 @@
 (ns baum.core
   (:refer-clojure :exclude [read-string])
   (:require [baum.resolver :as resolver]
+            [baum.merger :as merger]
             [baum.util :as u]
             [clojure.core.match :as m]
             [clojure.java.io :as io]
@@ -103,7 +104,7 @@
        u/vectorize
        (map importer)
        (remove nil?)
-       (reduce u/deep-merge)))
+       (reduce merger/merge-tree)))
 
 (defn- import-file [v opts]
   (import-multiple v #(if ((some-fn map? nil?) %)

@@ -1,6 +1,12 @@
 (ns baum.util
   (:import java.io.FileNotFoundException))
 
+(defn with-meta-safe
+  [obj m]
+  (if (instance? clojure.lang.IObj obj)
+    (with-meta obj m)
+    obj))
+
 (defn deep-merge
   [& vals]
   (if (every? map? vals)
