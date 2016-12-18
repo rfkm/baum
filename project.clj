@@ -15,7 +15,7 @@
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [org.clojure/tools.reader "1.0.0-alpha2"]]
   :profiles {:dev    {:dependencies [[org.clojure/clojure "1.8.0"]
-                                     [midje "1.8.3"]]
+                                     [midje "1.9.0-alpha6"]]
                       :plugins      [[lein-midje "3.2.1"]
                                      [lein-environ "1.1.0"]]
                       :env          {:env "dev"}}
